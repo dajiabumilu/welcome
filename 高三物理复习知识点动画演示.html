@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高三物理复习知识点动画演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #444;
+        }
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+        nav a:hover {
+            background-color: #575757;
+        }
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 60px);
+        }
+        svg {
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: white;
+        }
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>高三物理复习知识点动画演示</h1>
+    </header>
+    <nav>
+        <a href="#" onclick="showAnimation('harmonic')">简谐振动</a>
+        <a href="#" onclick="showAnimation('induction')">电磁感应</a>
+        <a href="#" onclick="showAnimation('newton')">牛顿第二定律</a>
+    </nav>
+    <div class="content">
+        <svg id="physics-animation" viewBox="0 0 300 300" width="300" height="300"></svg>
+    </div>
+    <div class="controls">
+        <button onclick="startAnimation()">开始</button>
+        <button onclick="stopAnimation()">停止</button>
+    </div>
+
+    <script>
+        let animationFrameId;
+        let startTime;
+        const svg = document.getElementById('physics-animation');
+
+        function showAnimation(type) {
+            stopAnimation();
+            svg.innerHTML = '';
+            switch (type) {
+                case 'harmonic':
+                    createHarmonicOscillator();
+                    break;
+                case 'induction':
+                    createElectromagneticInduction();
+                    break;
+                case 'newton':
+                    createNewtonSecondLaw();
+                    break;
+            }
+        }
+
+        function startAnimation() {
+            startTime = performance.now();
+            animate();
+        }
+
+        function stopAnimation() {
+            cancelAnimationFrame(animationFrameId);
+        }
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+
+            const harmonicBall = svg.querySelector('#harmonic-ball');
+            if (harmonicBall) {
+                const amplitude = 100; // Amplitude of oscillation
+                const frequency = 0.5; // Frequency in Hz
+                const phaseShift = 0; // Phase shift in radians
+                const centerY = 150; // Center y-coordinate
+
+                const x = 150 + amplitude * Math.sin(frequency * 2 * Math.PI * elapsed / 1000 + phaseShift);
+                harmonicBall.setAttribute('cx', x);
+            }
+
+            const inductionBar = svg.querySelector('#induction-bar');
+            if (inductionBar) {
+                const speed = 1; // Speed of bar movement
+                const maxPosition = 200;
+                const minPosition = 100;
+                const direction = inductionBar.getAttribute('data-direction') === 'right' ? 1 : -1;
+
+                let currentX = parseFloat(inductionBar.getAttribute('x')) || minPosition;
+                currentX += speed * direction;
+
+                if (currentX >= maxPosition || currentX <= minPosition) {
+                    inductionBar.setAttribute('data-direction', direction === 1 ? 'left' : 'right');
+                }
+
+                inductionBar.setAttribute('x', currentX);
+            }
+
+            const newtonCar = svg.querySelector('#newton-car');
+            if (newtonCar) {
+                const force = 10; // Force applied to the car
+                const mass = 1; // Mass of the car
+                const acceleration = force / mass; // Acceleration according to Newton's second law
+                const timeInSeconds = elapsed / 1000; // Convert milliseconds to seconds
+                const distanceMoved = acceleration * Math.pow(timeInSeconds, 2) / 2; // Distance moved by the car
+
+                const newXPosition = Math.min(distanceMoved * 10, 250); // Scale factor and limit to the right side of the SVG
+
+                newtonCar.setAttribute('transform', `translate(${newXPosition}, 0)`);
+            }
+
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        function createHarmonicOscillator() {
+            svg.innerHTML = `
+                <rect x="145" y="0" width="10" height="300" fill="#333"/>
+                <circle id="harmonic-ball" cx="150" cy="150" r="10" fill="#ff6347"/>
+            `;
+        }
+
+        function createElectromagneticInduction() {
+            svg.innerHTML = `
+                <rect x="50" y="120" width="200" height="20" fill="#333"/>
+                <rect x="100" y="50" width="100" height="20" fill="#333"/>
+                <rect x="100" y="200" width="100" height="20" fill="#333"/>
+                <rect id="induction-bar" x="100" y="100" width="100" height="20" fill="#ff6347" data-direction="right"/>
+            `;
+        }
+
+        function createNewtonSecondLaw() {
+            svg.innerHTML = `
+                <rect x="50" y="140" width="200" height="20" fill="#333"/>
+                <g id="newton-car" transform="translate(0, 0)">
+                    <rect x="50" y="100" width="100" height="50" fill="#ff6347"/>
+                    <rect x="100" y="80" width="20" height="40" fill="#333"/>
+                    <rect x="120" y="80" width="20" height="40" fill="#333"/>
+                </g>
+            `;
+        }
+
+        // Default to showing Harmonic Oscillator on page load
+        window.onload = () => {
+            showAnimation('harmonic');
+        };
+    </script>
+</body>
+</html>
+
+
